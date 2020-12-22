@@ -29,8 +29,10 @@ using locals() which does exactly that.''')
 			raise ValueError(f'Directory "{self._measurement_base_path}" does not exist.')
 		
 		with (self.processed_data_dir_path/Path(f'backup.{self._processing_script_absolute_path.parts[-1]}')).open('w') as ofile:
-			print(f'# This is an automatic copy of the script that processed the data in this directory. The timestamp for this processing is {self._timestamp}.', file = ofile)
-			print(f'# The variables in the script at the moment this copy was made were:', file = ofile)
+			print(f'# This is an automatic copy of the script that processed the data in this directory.', file = ofile)
+			print(f'# The script original location was {self._processing_script_absolute_path}', file = ofile)
+			print('# The timestamp for this processing is {self._timestamp}.', file = ofile)
+			print(f'# The local variables in the script at the moment this copy was made were:', file = ofile)
 			for key in variables:
 				print(f'# {key}: {variables[key]}', file = ofile)
 			print(f'# -----------------------------------', file = ofile)
