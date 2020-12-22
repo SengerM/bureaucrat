@@ -1,7 +1,6 @@
 from pathlib import Path
 import datetime
 import __main__
-from shutil import copyfile
 import warnings
 
 class Bureaucrat:
@@ -11,7 +10,14 @@ class Bureaucrat:
 	- Stuff that ends in "name" are strings.
 	"""
 	PROCESSED_DATA_DIRECTORY_PREFIX = 'processed_by_script_'
-	def __init__(self, measurement_base_path: str):
+	def __init__(self, measurement_base_path: str, variables: dict = None):
+		if variables is None:
+			raise ValueError(f'''<variables> must be a dictionary with the variables names and their values, so the Bureaucrat can keep a record in the processed data directory. The easy way is to call
+bureaucrat = Bureaucrat(
+	measurement_base_path = "path/to/the/measurement"
+	variables = locals()
+)
+using locals() which does exactly that.''')
 		if ' ' in measurement_base_path:
 			warnings.warn(f'The <measurement_base_path> = "{measurement_base_path}" contains blank spaces. I can handle this, but it is better to aviod them.')
 		self._timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
@@ -21,6 +27,19 @@ class Bureaucrat:
 		
 		if not self._measurement_base_path.is_dir():
 			raise ValueError(f'Directory "{self._measurement_base_path}" does not exist.')
+		
+		with (self.processed_data_dir_path/Path(f'{self._processing_script_absolute_path.parts[-1]}')).open('w') as ofile:
+			print(f'# This is an automatic copy of the script that processed the data in this directory. The timestamp for this processing is {self._timestamp}.', file = ofile)
+			print(f'# The variables in the script at the moment this copy was made were:', file = ofile)
+			print(f'# {variables}', file = ofile)
+			print(f'# -----------------------------------', file = ofile)
+			with self._processing_script_absolute_path.open('r') as ifile:
+				for line in ifile:
+					line = line.replace("\n","").replace("\r","")
+					if 'locals()' in line:
+						print(f'{line} # ← Variables were registered at this point: {variables}', file = ofile)
+					else:
+						print(line, file = ofile)
 		
 	@property
 	def measurement_base_path(self):
