@@ -10,7 +10,7 @@ class Bureaucrat:
 	- Stuff that ends in "name" are strings.
 	"""
 	PROCESSED_DATA_DIRECTORY_PREFIX = 'processed_by_script_'
-	def __init__(self, measurement_base_path: str, variables: dict = None):
+	def __init__(self, measurement_base_path: str, variables: dict = None, new_measurement=False):
 		if variables is None:
 			raise ValueError(f'''<variables> must be a dictionary with the variables names and their values, so the Bureaucrat can keep a record in the processed data directory. The easy way is to call
 bureaucrat = Bureaucrat(
@@ -25,8 +25,12 @@ using locals() which does exactly that.''')
 		self._processing_script_absolute_path = Path.cwd()/Path( __main__.__file__)
 		self._processed_data_subdir_name = f'{self.PROCESSED_DATA_DIRECTORY_PREFIX}{self._processing_script_absolute_path.parts[-1].replace(".py","")}'
 		
-		if not self._measurement_base_path.is_dir():
-			raise ValueError(f'Directory "{self._measurement_base_path}" does not exist.')
+		if new_measurement == False:
+			if not self._measurement_base_path.is_dir():
+				raise ValueError(f'Directory "{self._measurement_base_path}" does not exist.')
+		else:
+			self._measurement_base_path = Path('/'.join(list(self._measurement_base_path.parts[:-1]) + [f'{self._timestamp}_{self._measurement_base_path.parts[-1]}']))
+			self._measurement_base_path.mkdir()
 		
 		with (self.processed_data_dir_path/Path(f'backup.{self._processing_script_absolute_path.parts[-1]}')).open('w') as ofile:
 			print(f'# This is an automatic copy of the script that processed the data in this directory.', file = ofile)
@@ -59,8 +63,9 @@ using locals() which does exactly that.''')
 	@property
 	def raw_data_dir_path(self):
 		raw_path = self._measurement_base_path/Path('raw')
-		if not raw_path.is_dir():
-			warnings.warn(f'Directory with raw data "{raw_path}" does not exist.')
+		raw_path.mkdir(exist_ok=True)
+		# ~ if not raw_path.is_dir():
+			# ~ warnings.warn(f'Directory with raw data "{raw_path}" does not exist.')
 		return raw_path
 	
 	@property
