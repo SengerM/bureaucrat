@@ -35,7 +35,7 @@ using locals() which does exactly that.''')
 		with (self.processed_data_dir_path/Path(f'backup.{self._processing_script_absolute_path.parts[-1]}')).open('w') as ofile:
 			print(f'# This is an automatic copy of the script that processed the data in this directory.', file = ofile)
 			print(f'# The script original location was {self._processing_script_absolute_path}', file = ofile)
-			print('# The timestamp for this processing is {self._timestamp}.', file = ofile)
+			print(f'# The timestamp for this processing is {self._timestamp}.', file = ofile)
 			print(f'# The local variables in the script at the moment this copy was made were:', file = ofile)
 			for key in variables:
 				print(f'# {key}: {variables[key]}', file = ofile)
@@ -44,7 +44,7 @@ using locals() which does exactly that.''')
 				for line in ifile:
 					line = line.replace("\n","").replace("\r","")
 					if 'locals()' in line:
-						print(f'{line} # ← Variables were registered at this point: {variables}', file = ofile)
+						print(f'{line} # <-- Variables were registered at this point: {variables}', file = ofile)
 					else:
 						print(line, file = ofile)
 		
