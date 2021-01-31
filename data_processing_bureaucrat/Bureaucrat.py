@@ -23,7 +23,7 @@ using locals() which does exactly that.''')
 			warnings.warn(f'The <measurement_base_path> = "{measurement_base_path}" contains blank spaces. I can handle this, but it is better to aviod them.')
 		self._timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 		self._measurement_base_path =  Path(measurement_base_path)
-		self._processing_script_absolute_path = Path(inspect.currentframe().f_back.f_code.co_filename)
+		self._processing_script_absolute_path = Path.cwd()/Path(inspect.currentframe().f_back.f_code.co_filename)
 		self._processed_data_subdir_name = f'{self.PROCESSED_DATA_DIRECTORY_PREFIX}{self._processing_script_absolute_path.parts[-1].replace(".py","")}'
 		
 		if new_measurement == False:
