@@ -2,6 +2,7 @@ from pathlib import Path
 import datetime
 import __main__
 import warnings
+from tqdm.contrib.telegram import tqdm
 
 class Bureaucrat:
 	"""
@@ -61,7 +62,12 @@ using locals() which does exactly that.''')
 		return self._timestamp
 	
 	@property
+	def timestamp(self):
+		return self._timestamp
+	
+	@property
 	def raw_data_dir_path(self):
+		warnings.warn(f'<raw_data_dir_path> is deprecated. It is better to store everything in the script processed data dir path.')
 		raw_path = self._measurement_base_path/Path('raw')
 		raw_path.mkdir(exist_ok=True)
 		# ~ if not raw_path.is_dir():
@@ -79,3 +85,44 @@ using locals() which does exactly that.''')
 		if not _.is_dir():
 			warnings.warn(f'Directory with the output of script <{script_name}> "{_}" does not exist.')
 		return _
+
+class TelegramProgressBar:
+	"""
+	Taken from here: # https://stackoverflow.com/a/26761413/8849755
+	
+	Usage example
+	-------------
+	
+	from data_processing_bureaucrat.Bureaucrat import Bureaucrat, TelegramProgressBar
+	import time
+
+	bureaucrat = Bureaucrat(
+		measurement_base_path = 'testing_the_bureaucrat',
+		variables = locals(),
+		new_measurement = True,
+	)
+
+	with TelegramProgressBar(99, bureaucrat) as pbar:
+		for k in range(99):
+			time.sleep(1)
+			pbar.update(1)
+	"""
+	def __init__(self, total, bureaucrat: Bureaucrat, telegram_token='923059887:AAGW18jNJOshNi83r0Y6JsfizCdrCi8ytZQ', telegram_chat_id='164530575', **kwargs):
+		BARRAENE = '\n'
+		self._total = total
+		self._telegram_token = telegram_token
+		self._telegram_chat_id = telegram_chat_id
+		self._description = bureaucrat.timestamp
+
+	def __enter__(self):
+		self._pbar = tqdm(
+			total = self._total, 
+			token = self._telegram_token, 
+			chat_id = self._telegram_chat_id,
+			desc = self._description,
+		)
+		return self._pbar
+		
+	def __exit__(self, exc_type, exc_value, exc_traceback):
+		self._pbar.__exit__(exc_type, exc_value, exc_traceback)
+		
