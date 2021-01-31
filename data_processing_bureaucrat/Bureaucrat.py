@@ -1,8 +1,8 @@
 from pathlib import Path
 import datetime
-import __main__
 import warnings
 from tqdm.contrib.telegram import tqdm
+import inspect
 
 class Bureaucrat:
 	"""
@@ -23,7 +23,7 @@ using locals() which does exactly that.''')
 			warnings.warn(f'The <measurement_base_path> = "{measurement_base_path}" contains blank spaces. I can handle this, but it is better to aviod them.')
 		self._timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 		self._measurement_base_path =  Path(measurement_base_path)
-		self._processing_script_absolute_path = Path.cwd()/Path( __main__.__file__)
+		self._processing_script_absolute_path = Path(inspect.currentframe().f_back.f_code.co_filename)
 		self._processed_data_subdir_name = f'{self.PROCESSED_DATA_DIRECTORY_PREFIX}{self._processing_script_absolute_path.parts[-1].replace(".py","")}'
 		
 		if new_measurement == False:
@@ -36,7 +36,7 @@ using locals() which does exactly that.''')
 		with (self.processed_data_dir_path/Path(f'backup.{self._processing_script_absolute_path.parts[-1]}')).open('w') as ofile:
 			print(f'# This is an automatic copy of the script that processed the data in this directory.', file = ofile)
 			print(f'# The script original location was {self._processing_script_absolute_path}', file = ofile)
-			print('# The timestamp for this processing is {self._timestamp}.', file = ofile)
+			print(f'# The timestamp for this processing is {self._timestamp}.', file = ofile)
 			print(f'# The local variables in the script at the moment this copy was made were:', file = ofile)
 			for key in variables:
 				print(f'# {key}: {variables[key]}', file = ofile)
@@ -45,7 +45,7 @@ using locals() which does exactly that.''')
 				for line in ifile:
 					line = line.replace("\n","").replace("\r","")
 					if 'locals()' in line:
-						print(f'{line} # ← Variables were registered at this point: {variables}', file = ofile)
+						print(f'{line} # <-- Variables were registered at this point: {variables}', file = ofile)
 					else:
 						print(line, file = ofile)
 		
