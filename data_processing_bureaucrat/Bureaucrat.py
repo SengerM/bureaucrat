@@ -84,3 +84,15 @@ using locals() which does exactly that.''')
 		if not _.is_dir():
 			warnings.warn(f'Directory with the output of script <{script_name}> "{_}" does not exist.')
 		return _
+
+class TelegramReportingInformation:
+	BOT_TOKEN = '923059887:AAGW18jNJOshNi83r0Y6JsfizCdrCi8ytZQ'
+	CHAT_ID = '164530575'
+	
+	@property
+	def token(self):
+		return self.BOT_TOKEN
+	
+	@property
+	def chat_id(self):
+		return self.CHAT_ID
