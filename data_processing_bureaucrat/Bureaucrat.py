@@ -86,13 +86,13 @@ using locals() which does exactly that.''')
 		return _
 
 class TelegramReportingInformation:
-	BOT_TOKEN = '923059887:AAGW18jNJOshNi83r0Y6JsfizCdrCi8ytZQ'
-	CHAT_ID = '164530575'
+	apples = '1689568059:AAFkl3e0hsHBKfYF65VDxqbvIiahhbdjChY'
+	strawberries = '164530575'
 	
 	@property
 	def token(self):
-		return self.BOT_TOKEN
+		return self.apples
 	
 	@property
 	def chat_id(self):
-		return self.CHAT_ID
+		return self.strawberries
