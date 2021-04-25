@@ -81,8 +81,6 @@ using locals() which does exactly that.''')
 	
 	def processed_by_script_dir_path(self, script_name: str):
 		_ = self._measurement_base_path/Path(f'{self.PROCESSED_DATA_DIRECTORY_PREFIX}{script_name.replace(".py","")}')
-		if not _.is_dir():
-			warnings.warn(f'Directory with the output of script <{script_name}> "{_}" does not exist.')
 		return _
 
 class TelegramReportingInformation:
