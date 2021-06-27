@@ -9,7 +9,7 @@ class Bureaucrat:
 	- Stuff that ends in "path" is supposed to be/return an instance of Path.
 	- Stuff that ends in "name" are strings.
 	"""
-	PROCESSED_DATA_DIRECTORY_PREFIX = 'processed_by_script_'
+	PROCESSED_DATA_DIRECTORY_PREFIX = ''
 	def __init__(self, measurement_base_path: str, variables: dict = None, new_measurement=False):
 		if variables is None:
 			raise ValueError(f'''<variables> must be a dictionary with the variables names and their values, so the Bureaucrat can keep a record in the processed data directory. The easy way is to call
