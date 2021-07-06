@@ -18,6 +18,7 @@ bureaucrat = Bureaucrat(
 	variables = locals()
 )
 using locals() which does exactly that.''')
+		measurement_base_path = str(measurement_base_path)
 		if ' ' in measurement_base_path:
 			warnings.warn(f'The <measurement_base_path> = "{measurement_base_path}" contains blank spaces. I can handle this, but it is better to aviod them.')
 		self._timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
