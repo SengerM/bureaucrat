@@ -49,6 +49,11 @@ using locals() which does exactly that.''')
 					else:
 						print(line, file = ofile)
 		
+		self.job_succesfully_completed_flag_file_path = self.processed_data_dir_path/Path('.script_successfully_applied')
+		self._job_successfully_completed_flag = False
+		if self.job_succesfully_completed_flag_file_path.is_file():
+			self._job_successfully_completed_flag = True
+	
 	@property
 	def measurement_base_path(self):
 		return self._measurement_base_path
@@ -83,6 +88,32 @@ using locals() which does exactly that.''')
 	def processed_by_script_dir_path(self, script_name: str):
 		_ = self._measurement_base_path/Path(f'{self.PROCESSED_DATA_DIRECTORY_PREFIX}{script_name.replace(".py","")}')
 		return _
+	
+	@property
+	def job_successfully_completed_flag(self):
+		"""Returns `True` if the `verify_no_errors_context` method was called before and no errors occurred, otherwise returns `False` (meaning that there were errors or the `verify_no_errors_context` was not used)."""
+		return self._job_successfully_completed_flag
+	
+	def verify_no_errors_context(self):
+		"""Call with a context manager to create a hidden file if the job is completed without errors so later on other scripts can verify this. Example:
+		```
+		with buraucrat.veriry_no_errors_context:
+			very_important_function()
+		```
+		If no errors occur within the `with` block, a file will be created marking the completion of the tasks with no errors."""
+		return 2_MarkJobWithNoErrors(self.job_succesfully_completed_flag_file_path)
+	
+class _MarkJobWithNoErrors:
+	def __init__(self, file_path: Path):
+		self.file_path = file_path
+	
+	def __enter__(self):
+		self.file_path.unlink(missing_ok=True)
+	
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		if all([exc is None for exc in [exc_type, exc_val, exc_tb]]): # This means there was no error, see https://docs.python.org/3/reference/datamodel.html#object.__exit__
+			with open(self.file_path, 'w') as ofile:
+				print(f'Job completed with no errors on {datetime.datetime.now()}.', file=ofile)
 
 class TelegramReportingInformation:
 	apples = '1689568059:AAFkl3e0hsHBKfYF65VDxqbvIiahhbdjChY'
