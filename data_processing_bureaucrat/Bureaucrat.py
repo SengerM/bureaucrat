@@ -101,7 +101,7 @@ using locals() which does exactly that.''')
 			very_important_function()
 		```
 		If no errors occur within the `with` block, a file will be created marking the completion of the tasks with no errors."""
-		return 2_MarkJobWithNoErrors(self.job_succesfully_completed_flag_file_path)
+		return _MarkJobWithNoErrors(self.job_succesfully_completed_flag_file_path)
 	
 class _MarkJobWithNoErrors:
 	def __init__(self, file_path: Path):
