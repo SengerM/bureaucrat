@@ -10,6 +10,8 @@ class Bureaucrat:
 	- Stuff that ends in "name" are strings.
 	"""
 	PROCESSED_DATA_DIRECTORY_PREFIX = ''
+	SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME = '.script_successfully_applied'
+	
 	def __init__(self, measurement_base_path: str, variables: dict = None, new_measurement=False):
 		if variables is None:
 			raise ValueError(f'''<variables> must be a dictionary with the variables names and their values, so the Bureaucrat can keep a record in the processed data directory. The easy way is to call
@@ -49,10 +51,10 @@ using locals() which does exactly that.''')
 					else:
 						print(line, file = ofile)
 		
-		self.job_succesfully_completed_flag_file_path = self.processed_data_dir_path/Path('.script_successfully_applied')
-		self._job_successfully_completed_flag = False
-		if self.job_succesfully_completed_flag_file_path.is_file():
-			self._job_successfully_completed_flag = True
+		self.this_script_job_succesfully_completed_flag_file_path = self.processed_data_dir_path/Path(self.SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME)
+		self._this_script_job_successfully_completed_before_flag = False
+		if self.this_script_job_succesfully_completed_flag_file_path.is_file():
+			self._this_script_job_successfully_completed_before_flag = True
 	
 	@property
 	def measurement_base_path(self):
@@ -81,18 +83,32 @@ using locals() which does exactly that.''')
 	
 	@property
 	def processed_data_dir_path(self):
+		"""Returns the path to the sub directory where the current script
+		should store its data."""
 		_ = self._measurement_base_path/Path(self._processed_data_subdir_name)
 		_.mkdir(exist_ok=True)
 		return _
 	
 	def processed_by_script_dir_path(self, script_name: str):
+		"""Returns the path to the sub directory where `script_name` 
+		should have stored its data."""
 		_ = self._measurement_base_path/Path(f'{self.PROCESSED_DATA_DIRECTORY_PREFIX}{script_name.replace(".py","")}')
 		return _
 	
-	@property
-	def job_successfully_completed_flag(self):
-		"""Returns `True` if the `verify_no_errors_context` method was called before and no errors occurred, otherwise returns `False` (meaning that there were errors or the `verify_no_errors_context` was not used)."""
-		return self._job_successfully_completed_flag
+	def job_successfully_completed_by_script(self, script_name: str) -> bool:
+		"""Returns `True` if the script `script_name` was applied before 
+		to the current measurement AND the `verify_no_errors_context` method
+		was used AND such script ended without errors.
+		If `script_name` is `'this script'` (case unsensitive) then it 
+		checks for the current script without the need to hardcode its 
+		name.
+		"""
+		if script_name.lower() == 'this script':
+			script_name = str(self._processing_script_absolute_path.parts[-1])
+		if script_name == str(self._processing_script_absolute_path.parts[-1]):
+			return self._this_script_job_successfully_completed_before_flag
+		else:
+			return (self.processed_by_script_dir_path(script_name)/Path(self.SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME)).is_file()
 	
 	def verify_no_errors_context(self):
 		"""Call with a context manager to create a hidden file if the job is completed without errors so later on other scripts can verify this. Example:
@@ -101,7 +117,7 @@ using locals() which does exactly that.''')
 			very_important_function()
 		```
 		If no errors occur within the `with` block, a file will be created marking the completion of the tasks with no errors."""
-		return _MarkJobWithNoErrors(self.job_succesfully_completed_flag_file_path)
+		return _MarkJobWithNoErrors(self.this_script_job_succesfully_completed_flag_file_path)
 	
 class _MarkJobWithNoErrors:
 	def __init__(self, file_path: Path):
