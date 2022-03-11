@@ -73,15 +73,6 @@ using locals() which does exactly that.''')
 		return self._timestamp
 	
 	@property
-	def raw_data_dir_path(self):
-		warnings.warn(f'<raw_data_dir_path> is deprecated. It is better to store everything in the script processed data dir path.')
-		raw_path = self._measurement_base_path/Path('raw')
-		raw_path.mkdir(exist_ok=True)
-		# ~ if not raw_path.is_dir():
-			# ~ warnings.warn(f'Directory with raw data "{raw_path}" does not exist.')
-		return raw_path
-	
-	@property
 	def processed_data_dir_path(self):
 		"""Returns the path to the sub directory where the current script
 		should store its data."""
@@ -130,15 +121,3 @@ class _MarkJobWithNoErrors:
 		if all([exc is None for exc in [exc_type, exc_val, exc_tb]]): # This means there was no error, see https://docs.python.org/3/reference/datamodel.html#object.__exit__
 			with open(self.file_path, 'w') as ofile:
 				print(f'Job completed with no errors on {datetime.datetime.now()}.', file=ofile)
-
-class TelegramReportingInformation:
-	apples = '1689568059:AAFkl3e0hsHBKfYF65VDxqbvIiahhbdjChY'
-	strawberries = '164530575'
-	
-	@property
-	def token(self):
-		return self.apples
-	
-	@property
-	def chat_id(self):
-		return self.strawberries
