@@ -1,12 +1,12 @@
 import setuptools
 
 setuptools.setup(
-	name = "data_processing_bureaucrat",
-	version = "0.0.0",
+	name = "bureaucrat",
+	version = "1.0",
 	author = "Matias H. Senger",
 	author_email = "m.senger@hotmail.com",
-	description = "A unique plotting interface",
-	url = "https://github.com/SengerM/myplotlib",
+	description = "A bureaucrat to help me handling the data",
+	url = "",
 	packages = setuptools.find_packages(),
 	classifiers = [
 		"Programming Language :: Python :: 3",
