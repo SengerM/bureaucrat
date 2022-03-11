@@ -73,12 +73,40 @@ using locals() which does exactly that.''')
 		return self._timestamp
 	
 	@property
+	def current_script_output_directory_path(self) -> Path:
+		"""Returns the full path to the directory where you should place
+		the data produced by your current script.
+		
+		Returns
+		-------
+		path_to_directory: Path
+			A `pathlib.Path` object to the directory.
+		"""
+		return self.processed_data_dir_path
+	
+	@property
 	def processed_data_dir_path(self):
 		"""Returns the path to the sub directory where the current script
 		should store its data."""
 		_ = self._measurement_base_path/Path(self._processed_data_subdir_name)
 		_.mkdir(exist_ok=True)
 		return _
+	
+	def other_script_output_directory_path(self, script_name: str) -> Path:
+		"""Returns the full path to the directory where another script that
+		was run for the current measurement should have stored it's data.
+		
+		Parameters
+		----------
+		script_name: str
+			The name of the other script.
+		
+		Returns
+		-------
+		path_to_directory: Path
+			A `pathlib.Path` object to the directory.
+		"""
+		return self.processed_by_script_dir_path(script_name)
 	
 	def processed_by_script_dir_path(self, script_name: str):
 		"""Returns the path to the sub directory where `script_name` 
