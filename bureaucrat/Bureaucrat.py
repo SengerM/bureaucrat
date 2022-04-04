@@ -15,15 +15,15 @@ class Bureaucrat:
 	PROCESSED_DATA_DIRECTORY_PREFIX = ''
 	SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME = '.script_successfully_applied'
 	
-	def __init__(self, measurement_base_path: str, variables: dict = None, new_measurement=False):
+	def __init__(self, measurement_base_path: Path, variables: dict = None, new_measurement=False):
 		"""Create an instance of `Bureaucrat`.
 		
 		Parameters
 		----------
-		measurement_base_path: str
+		measurement_base_path: Path
 			Path to the directory that contains your measurement. Example:
 			```
-			measurement_base_path = '/path/to/my_measurement'
+			measurement_base_path = Path('/path/to/my_measurement')
 			```
 		variables: ATTENTION HERE!
 			This is in some sense a hack for creating a backup of the script
@@ -47,11 +47,12 @@ bureaucrat = Bureaucrat(
 	variables = locals()
 )
 using locals() which does exactly that.''')
-		measurement_base_path = str(measurement_base_path)
-		if ' ' in measurement_base_path:
-			warnings.warn(f'The <measurement_base_path> = "{measurement_base_path}" contains blank spaces. I can handle this, but it is better to aviod them.')
+		if not isinstance(measurement_base_path, Path):
+			raise TypeError(f'`measurement_base_path` must be an instance of {Path}, received object of type {type(measurement_base_path)}.')
+		if ' ' in str(measurement_base_path):
+			warnings.warn(f'The `measurement_base_path` = {repr(measurement_base_path)} contains blank spaces. I can handle this, but it is better to aviod them.')
 		self._timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-		self._measurement_base_path =  Path(measurement_base_path)
+		self._measurement_base_path =  measurement_base_path
 		self._processing_script_absolute_path = Path.cwd()/Path(inspect.currentframe().f_back.f_code.co_filename)
 		self._processed_data_subdir_name = f'{self.PROCESSED_DATA_DIRECTORY_PREFIX}{self._processing_script_absolute_path.parts[-1].replace(".py","")}'
 		
@@ -59,7 +60,7 @@ using locals() which does exactly that.''')
 			if not self._measurement_base_path.is_dir():
 				raise ValueError(f'Directory "{self._measurement_base_path}" does not exist.')
 		else:
-			self._measurement_base_path = Path('/'.join(list(self._measurement_base_path.parts[:-1]) + [f'{self._timestamp}_{self._measurement_base_path.parts[-1]}']))
+			self._measurement_base_path = self._measurement_base_path.parent/Path(f'{self._timestamp}_{self._measurement_base_path.parts[-1]}')
 			self._measurement_base_path.mkdir()
 		
 		with (self.processed_data_dir_path/Path(f'backup.{self._processing_script_absolute_path.parts[-1]}')).open('w') as ofile:
