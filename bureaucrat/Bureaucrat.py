@@ -172,7 +172,7 @@ using locals() which does exactly that.''')
 		is completed without errors so later on other scripts can verify 
 		this. Example:
 		```
-		with buraucrat.veriry_no_errors_context:
+		with buraucrat.veriry_no_errors_context():
 			very_important_function()
 		```
 		If no errors occur within the `with` block, a file will be created
