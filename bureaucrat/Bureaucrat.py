@@ -58,7 +58,7 @@ using locals() which does exactly that.''')
 		
 		if new_measurement == False:
 			if not self._measurement_base_path.is_dir():
-				raise ValueError(f'Directory "{self._measurement_base_path}" does not exist.')
+				raise FileNotFoundError(f'Directory "{self._measurement_base_path}" does not exist.')
 		else:
 			self._measurement_base_path = self._measurement_base_path.parent/Path(f'{self._timestamp}_{self._measurement_base_path.parts[-1]}')
 			self._measurement_base_path.mkdir()
