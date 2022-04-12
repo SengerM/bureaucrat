@@ -63,26 +63,12 @@ using locals() which does exactly that.''')
 			self._measurement_base_path = self._measurement_base_path.parent/Path(f'{self._timestamp}_{self._measurement_base_path.parts[-1]}')
 			self._measurement_base_path.mkdir()
 		
-		with (self.processed_data_dir_path/Path(f'backup.{self._processing_script_absolute_path.parts[-1]}')).open('w') as ofile:
-			print(f'# This is an automatic copy of the script that processed the data in this directory.', file = ofile)
-			print(f'# The script original location was {self._processing_script_absolute_path}', file = ofile)
-			print(f'# The timestamp for this processing is {self._timestamp}.', file = ofile)
-			print(f'# The local variables in the script at the moment this copy was made were:', file = ofile)
-			for key in variables:
-				print(f'# {key}: {variables[key]}', file = ofile)
-			print(f'# -----------------------------------', file = ofile)
-			with self._processing_script_absolute_path.open('r') as ifile:
-				for line in ifile:
-					line = line.replace("\n","").replace("\r","")
-					if 'locals()' in line:
-						print(f'{line} # <-- Variables were registered at this point: {variables}', file = ofile)
-					else:
-						print(line, file = ofile)
-		
 		self.this_script_job_succesfully_completed_flag_file_path = self.processed_data_dir_path/Path(self.SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME)
 		self._this_script_job_successfully_completed_before_flag = False
 		if self.this_script_job_succesfully_completed_flag_file_path.is_file():
 			self._this_script_job_successfully_completed_before_flag = True
+		
+		self._backup_calling_script_file(variables)
 	
 	@property
 	def measurement_base_path(self):
@@ -180,6 +166,26 @@ using locals() which does exactly that.''')
 		you can call `job_successfully_completed_by_script` and it will
 		tell you if there were errors or not."""
 		return _MarkJobWithNoErrors(self.this_script_job_succesfully_completed_flag_file_path)
+	
+	def _backup_calling_script_file(self, variables):
+		"""Creates a backup of the script in which this bureaucrat was
+		created, and stores it in the `self.processed_data_dir_path`.
+		"""
+		with (self.processed_data_dir_path/Path(f'backup.{self._processing_script_absolute_path.parts[-1]}')).open('w') as ofile:
+			print(f'# This is an automatic copy of the script that processed the data in this directory.', file = ofile)
+			print(f'# The script original location was {self._processing_script_absolute_path}', file = ofile)
+			print(f'# The timestamp for this processing is {self._timestamp}.', file = ofile)
+			print(f'# The local variables in the script at the moment this copy was made were:', file = ofile)
+			for key in variables:
+				print(f'# {key}: {variables[key]}', file = ofile)
+			print(f'# -----------------------------------', file = ofile)
+			with self._processing_script_absolute_path.open('r') as ifile:
+				for line in ifile:
+					line = line.replace("\n","").replace("\r","")
+					if 'locals()' in line:
+						print(f'{line} # <-- Variables were registered at this point: {variables}', file = ofile)
+					else:
+						print(line, file = ofile)
 	
 class _MarkJobWithNoErrors:
 	def __init__(self, file_path: Path):
