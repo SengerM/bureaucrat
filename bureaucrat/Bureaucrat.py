@@ -132,7 +132,7 @@ using locals() which does exactly that.''')
 		_ = self._measurement_base_path/Path(f'{self.PROCESSED_DATA_DIRECTORY_PREFIX}{script_name.replace(".py","")}')
 		return _
 	
-	def job_successfully_completed_by_script(self, script_name: str) -> bool:
+	def job_successfully_completed_by_script(self, script_name) -> bool:
 		"""Returns `True` if the script `script_name` was applied before 
 		to the current measurement AND the `verify_no_errors_context` method
 		was used AND such script ended without errors.
@@ -142,17 +142,33 @@ using locals() which does exactly that.''')
 		
 		Parameters
 		----------
-		script_name: str
+		script_name: str, or list of str
 			Name of the script you want to check if it was run (and if it
 			was whether it was without errors) on the current measurement.
+			If a list is passed, it should contain the names of the scripts
+			that you want to check.
+		
+		Returns
+		-------
+		job_completed: bool
+			True if the job supposed to be done by `script_name` was
+			completed with no errors. If `script_name` is a list of scripts
+			then `job_completed` will be true only if all of them were
+			completed.
 		"""
-		if script_name.lower() == 'this script':
-			script_name = str(self._processing_script_absolute_path.parts[-1])
-		if script_name == str(self._processing_script_absolute_path.parts[-1]):
-			return self._this_script_job_successfully_completed_before_flag
-		else:
-			return (self.processed_by_script_dir_path(script_name)/Path(self.SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME)).is_file()
-	
+		if not isinstance(script_name, (str, list)):
+			raise TypeError(f'`script_name` must be of type `str` or `list`, received object of type `{type(script_name)}`.')
+		if isinstance(script_name, str):
+			if script_name.lower() == 'this script':
+				script_name = str(self._processing_script_absolute_path.parts[-1])
+			if script_name == str(self._processing_script_absolute_path.parts[-1]):
+				job_completed = self._this_script_job_successfully_completed_before_flag
+			else:
+				job_completed = (self.processed_by_script_dir_path(script_name)/Path(self.SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME)).is_file()
+		elif isinstance(script_name, str):
+			job_completed = all([self.job_successfully_completed_by_script(name) for name in script_name])
+		return job_completed
+			
 	def verify_no_errors_context(self):
 		"""Call with a context manager to create a hidden file if the job
 		is completed without errors so later on other scripts can verify 
@@ -164,7 +180,8 @@ using locals() which does exactly that.''')
 		If no errors occur within the `with` block, a file will be created
 		indicating the completion of the tasks with no errors. Later on
 		you can call `job_successfully_completed_by_script` and it will
-		tell you if there were errors or not."""
+		tell you if there were errors or not.
+		"""
 		return _MarkJobWithNoErrors(self.this_script_job_succesfully_completed_flag_file_path)
 	
 	def _backup_calling_script_file(self, variables):
