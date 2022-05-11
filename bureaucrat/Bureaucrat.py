@@ -64,9 +64,8 @@ using locals() which does exactly that.''')
 			self._measurement_base_path.mkdir()
 		
 		self.this_script_job_succesfully_completed_flag_file_path = self.processed_data_dir_path/Path(self.SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME)
-		self._this_script_job_successfully_completed_before_flag = False
-		if self.this_script_job_succesfully_completed_flag_file_path.is_file():
-			self._this_script_job_successfully_completed_before_flag = True
+		self._this_script_job_successfully_completed_before_flag = self.this_script_job_succesfully_completed_flag_file_path.is_file()
+		self._this_script_job_successfully_completed_before_flag |= (self.processed_data_dir_path/Path('.script_successfully_applied')).is_file() # This is to maintain compatibility with the older version. Now this is not a hidden file anymore because it was causing troubles with remote machines, cloud sync, etc.
 		
 		self._backup_calling_script_file(variables)
 	
