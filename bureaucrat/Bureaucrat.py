@@ -13,7 +13,7 @@ class Bureaucrat:
 	- Stuff that ends in "name" are strings.
 	"""
 	PROCESSED_DATA_DIRECTORY_PREFIX = ''
-	SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME = '.script_successfully_applied'
+	SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME = 'script_successfully_applied'
 	
 	def __init__(self, measurement_base_path: Path, variables: dict = None, new_measurement=False):
 		"""Create an instance of `Bureaucrat`.
@@ -165,6 +165,7 @@ using locals() which does exactly that.''')
 				job_completed = self._this_script_job_successfully_completed_before_flag
 			else:
 				job_completed = (self.processed_by_script_dir_path(script_name)/Path(self.SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME)).is_file()
+				job_completed |= (self.processed_by_script_dir_path(script_name)/Path('.script_successfully_applied')).is_file() # This is to maintain compatibility with the older version. Now this is not a hidden file anymore because it was causing troubles with remote machines, cloud sync, etc.
 		elif isinstance(script_name, str):
 			job_completed = all([self.job_successfully_completed_by_script(name) for name in script_name])
 		return job_completed
@@ -214,4 +215,4 @@ class _MarkJobWithNoErrors:
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		if all([exc is None for exc in [exc_type, exc_val, exc_tb]]): # This means there was no error, see https://docs.python.org/3/reference/datamodel.html#object.__exit__
 			with open(self.file_path, 'w') as ofile:
-				print(f'Job completed with no errors on {datetime.datetime.now()}.', file=ofile)
+				print(f'The sole purpose of this file is to indicate that this job was completed with no errors on {datetime.datetime.now()}.', file=ofile)
