@@ -159,15 +159,16 @@ bureaucrat = Bureaucrat(
 			self._temporary_directory = tempfile.TemporaryDirectory()
 		return Path(self._temporary_directory.name)
 	
-	def script_was_applied_without_errors(self, script_name:str) -> bool:
+	def script_was_applied_without_errors(self, script_name:str=None) -> bool:
 		"""Checks whether a script named `script_name` was run on the 
 		measurement being handled by the bureaucrat and if it ended
 		without errors.
 		
 		Parameters
 		----------
-		script_name: str
-			Name of the script that you want to check for.
+		script_name: str, optional
+			Name of the script that you want to check for. If not specified
+			then the name of the current script is used.
 		
 		Returns
 		-------
@@ -175,6 +176,8 @@ bureaucrat = Bureaucrat(
 			If the script ended without errors, `True` is returned, otherwise
 			`False`. 
 		"""
+		if script_name is None:
+			script_name = self._path_to_the_script_that_created_this_bureaucrat.parts[-1]
 		errors_report_file_path = self.path_to_output_directory_of_script_named(script_name)/Path('SmarterBureaucrat_errors_report.txt')
 		try:
 			with open(errors_report_file_path, 'r') as ifile:
