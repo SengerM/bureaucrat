@@ -16,7 +16,7 @@ class Bureaucrat:
 	PROCESSED_DATA_DIRECTORY_PREFIX = ''
 	SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME = 'script_successfully_applied'
 	
-	def __init__(self, measurement_base_path: Path, variables:dict=None, new_measurement=False, clear_output_directory_when_initializing=False):
+	def __init__(self, measurement_base_path: Path, variables:dict=None, new_measurement=False, clear_output_directory_when_initializing=True):
 		"""Create an instance of `Bureaucrat`.
 		
 		Parameters
@@ -40,7 +40,7 @@ class Bureaucrat:
 			performed in the past, for example you will now analyze this 
 			data with another script. If `True` then a new directory
 			will be created.
-		clear_output_directory_when_initializing: bool, default `False`
+		clear_output_directory_when_initializing: bool, default `True`
 			If `True`, all contents of the output directory (`Bureaucrat.current_script_output_directory_path`)
 			will be deleted when creating the Bureaucrat object. This allows
 			to remove old data that may remain from previous runs. If `False`
