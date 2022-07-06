@@ -2,6 +2,7 @@ from pathlib import Path
 import datetime
 import warnings
 import inspect
+from shutil import rmtree
 
 class Bureaucrat:
 	"""
@@ -15,7 +16,7 @@ class Bureaucrat:
 	PROCESSED_DATA_DIRECTORY_PREFIX = ''
 	SCRIPT_SUCCESSFULLY_FINISHED_WITHOUT_ERRORS_FILE_FLAG_NAME = 'script_successfully_applied'
 	
-	def __init__(self, measurement_base_path: Path, variables: dict = None, new_measurement=False):
+	def __init__(self, measurement_base_path: Path, variables:dict=None, new_measurement=False, clear_output_directory_when_initializing=False):
 		"""Create an instance of `Bureaucrat`.
 		
 		Parameters
@@ -39,6 +40,12 @@ class Bureaucrat:
 			performed in the past, for example you will now analyze this 
 			data with another script. If `True` then a new directory
 			will be created.
+		clear_output_directory_when_initializing: bool, default `False`
+			If `True`, all contents of the output directory (`Bureaucrat.current_script_output_directory_path`)
+			will be deleted when creating the Bureaucrat object. This allows
+			to remove old data that may remain from previous runs. If `False`
+			then the contents of such directory (e.g. from a previous
+			run) are kept.
 		"""
 		if variables is None:
 			raise ValueError(f'''<variables> must be a dictionary with the variables names and their values, so the Bureaucrat can keep a record in the processed data directory. The easy way is to call
@@ -67,6 +74,14 @@ using locals() which does exactly that.''')
 		self._this_script_job_successfully_completed_before_flag = self.this_script_job_succesfully_completed_flag_file_path.is_file()
 		self._this_script_job_successfully_completed_before_flag |= (self.processed_data_dir_path/Path('.script_successfully_applied')).is_file() # This is to maintain compatibility with the older version. Now this is not a hidden file anymore because it was causing troubles with remote machines, cloud sync, etc.
 		
+		# Before creating new files, we delete the old content if needed.
+		if clear_output_directory_when_initializing == True:
+			for p in self.current_script_output_directory_path.iterdir():
+				if p.is_file():
+					p.unlink()
+				elif p.is_dir():
+					rmtree(p)
+		# Below this line we can create new files.
 		self._backup_calling_script_file(variables)
 	
 	@property
