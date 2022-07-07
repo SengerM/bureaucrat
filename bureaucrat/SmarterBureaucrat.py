@@ -182,6 +182,42 @@ bureaucrat = Bureaucrat(
 		if there were any."""
 		return self.path_to_default_output_directory/Path('submeasurements')
 	
+	def find_all_submeasurements(self) -> dict:
+		"""Looks for submeasurements in the current measurement and returns
+		a dictionary with the name of the script pointing to another
+		dictionary containing the submeasurements names as keys and the
+		path to such measurements as items. For example:
+		```
+		{
+			'script_1.py': {'measurement_a': Path, 'measurement_b': Path},
+			'script_2.py': {'measurement_blah': Path},
+		}
+		```
+		Measurements are listed here independently of the exit status (this
+		means independently on the fact that there was an error or not).
+		Only looks for the first level submeasurements. This means that
+		if `measurement_a` has itself submeasurements, they will not appear
+		here. See the function `find_submeasurements_recursively` for this.
+		"""
+		submeasurements_tree = find_submeasurements_recursively(self.path_to_measurement_base_directory)
+		submeasurements_dict = {}
+		for top_level in submeasurements_tree: # `find_submeasurements_recursively` returns a tree starting from the top level measurement... This `for` loop only has one iteration.
+			for submeasurement in submeasurements_tree[top_level]:
+				path_to_submeasurement = Path(submeasurement)
+				submeasurement_name = path_to_submeasurement.parts[-1]
+				submeasurement_created_by_script = path_to_submeasurement.parts[-3]
+				if submeasurement_created_by_script not in submeasurements_dict:
+					submeasurements_dict[submeasurement_created_by_script] = dict()
+				submeasurements_dict[submeasurement_created_by_script][submeasurement_name] = path_to_submeasurement
+		return submeasurements_dict
+	
+	def find_submeasurements(self, script_name:str) -> dict:
+		"""Finds the submeasurements produced by script named `script_name`.
+		Returns a dictionary where the keys are the submeasurements names
+		and the items are `Path` objects pointing to each submeasurement.
+		"""
+		return self.find_all_submeasurements().get(script_name.replace('.py',''))
+	
 	def script_was_applied_without_errors(self, script_name:str=None) -> bool:
 		"""Checks whether a script named `script_name` was run on the 
 		measurement being handled by the bureaucrat and if it ended
