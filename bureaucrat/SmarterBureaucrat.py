@@ -6,7 +6,8 @@ import tempfile
 from shutil import rmtree
 
 class SmarterBureaucrat:
-	"""A class to normalize and ease the handling of directories with data.
+	"""Let a `SmartBureaucrat` ease your life by doing all the boring stuff
+	while you focus on the important things.
 	"""
 	def __init__(self, measurement_base_path:Path, _locals:dict=None, new_measurement=False):
 		"""Create an instance of `Bureaucrat`.
@@ -174,19 +175,26 @@ bureaucrat = Bureaucrat(
 		-------
 		did_it_run_without_errors: bool
 			If the script ended without errors, `True` is returned, otherwise
-			`False`. 
+			(either ended with errors or was not run at all) `False`. 
 		"""
 		if script_name is None:
 			script_name = self._path_to_the_script_that_created_this_bureaucrat.parts[-1]
 		errors_report_file_path = self.path_to_output_directory_of_script_named(script_name)/Path('SmarterBureaucrat_errors_report.txt')
+		
+		script_was_applied_without_errors = False
+		
 		try:
 			with open(errors_report_file_path, 'r') as ifile:
 				for line in ifile:
 					if 'run_status: no errors' in line:
-						return True
+						script_was_applied_without_errors = True
 		except FileNotFoundError:
 			pass
-		return False
+		
+		for fname in {'script_successfully_applied','.script_successfully_applied'}: # Compatibility with older bureaucrats...
+			script_was_applied_without_errors |= (self.path_to_default_output_directory(script_name)/Path(fname)).is_file()
+		
+		return script_was_applied_without_errors
 	
 	def path_to_output_directory_of_script_named(self, script_name:str) -> Path:
 		"""Returns the path to the directory where another script named 
