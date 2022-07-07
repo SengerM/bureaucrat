@@ -255,7 +255,7 @@ bureaucrat = Bureaucrat(
 		
 		return script_was_applied_without_errors
 	
-	def check_required_scripts_were_run_before(self, script_names, raise_error:bool=True) -> bool:
+	def check_required_scripts_were_run_before(self, script_names:list, raise_error:bool=True) -> bool:
 		"""Given a list of script names, check whether all of them were
 		previously run without errors on the current measurement. This 
 		is the same as using `script_was_applied_without_errors` in a loop
@@ -276,6 +276,10 @@ bureaucrat = Bureaucrat(
 			If all the scripts were applied without errors, `True` is
 			returned. Else `False.
 		"""
+		if isinstance(script_names, str): # This is to make it more practical...
+			script_names = [script_names]
+		if not isinstance(script_names, list):
+			raise TypeError(f'`script_names` must be a list, received an object of type {type(script_names)}.')
 		were_the_scripts_applied_without_errors = True
 		scripts_that_did_not_run_without_errors = set()
 		for script_name in script_names:
