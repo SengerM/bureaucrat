@@ -131,6 +131,13 @@ bureaucrat = Bureaucrat(
 			else: # If there was any kind of error...
 				print('run_status: there were errors', file=ofile)
 				print(f'If you are reading this it means that this script ended with errors on {datetime.datetime.now()}', file=ofile)
+		if self._new_measurement:
+			with open(self.path_to_measurement_base_directory/Path('README.md'), 'w') as ofile:
+				print(f'# Measurement: {self.measurement_name}', file=ofile)
+				print(f'This directory contains data from a measurement named {repr(self.measurement_name)} that was created on {self.birth_datetime}. The script that created this measurement was named `{self._path_to_the_script_that_created_this_bureaucrat.parts[-1]}` and you should be able to find the direct result of it in the directory called {repr(self.path_to_default_output_directory.parts[-1])} right next to this file.', file=ofile)
+				print(f'\n', file=ofile)
+				print(f'- Measurement name: {self.measurement_name}', file=ofile)
+				print(f'- Measurement datetime: {self.birth_datetime}', file=ofile)
 	
 	@property
 	def measurement_name(self) -> str:
