@@ -120,33 +120,29 @@ bureaucrat = Bureaucrat(
 				print(f'If you are reading this it means that this script ended with errors on {datetime.datetime.now()}', file=ofile)
 	
 	@property
-	def path_to_measurement_base_directory(self) -> Path:
-		"""Returns the path to the directory where all data concerning this
-		measurement (this and other scripts) should be.
-		"""
-		return self._measurement_base_path
-	
-	@property
 	def measurement_name(self) -> str:
 		"""Returns a string with the measurement name."""
 		return self.path_to_default_output_directory.parts[-1]
 	
 	@property
 	def birth_datetime(self) -> datetime.datetime:
-		"""Returns a `datetime.datetime` object with with the time when 
-		the bureaucrat was created.
+		"""Returns a `datetime.datetime` object with the time when 
+		the bureaucrat was created. This can be used as a timestamp for 
+		the current script run.
 		"""
 		return self._datetime_bureaucrat_was_born
 	
 	@property
+	def path_to_measurement_base_directory(self) -> Path:
+		"""Path to the directory where all data concerning this
+		measurement (this and other scripts) should be.
+		"""
+		return self._measurement_base_path
+	
+	@property
 	def path_to_default_output_directory(self) -> Path:
-		"""Returns the full path to the directory where you should place
-		the data produced by your current script.
-		
-		Returns
-		-------
-		path_to_directory: Path
-			A `pathlib.Path` object to the directory.
+		"""Path to the directory where you should place	the data produced
+		by your current script.
 		"""
 		if not hasattr(self, '_path_to_default_output_directory'):
 			self._path_to_default_output_directory = self.path_to_measurement_base_directory/Path(self._path_to_the_script_that_created_this_bureaucrat.parts[-1].replace(".py",""))
@@ -159,6 +155,12 @@ bureaucrat = Bureaucrat(
 		if not hasattr(self, '_temporary_directory'):
 			self._temporary_directory = tempfile.TemporaryDirectory()
 		return Path(self._temporary_directory.name)
+	
+	@property
+	def path_to_submeasurements_directory(self) -> Path:
+		"""Path to the directory where you should put all the submeasurements
+		if there were any."""
+		return self.path_to_default_output_directory/Path('submeasurements')
 	
 	def script_was_applied_without_errors(self, script_name:str=None) -> bool:
 		"""Checks whether a script named `script_name` was run on the 
