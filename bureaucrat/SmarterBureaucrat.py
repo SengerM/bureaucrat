@@ -5,6 +5,19 @@ import inspect
 import tempfile
 from shutil import rmtree
 
+def find_submeasurements_recursively(measurement_base_path:Path) -> dict:
+	submeasurements = dict()
+	for p in measurement_base_path.iterdir():
+		if p.is_dir():
+			if (p/Path('submeasurements')).is_dir():
+				for pp in (p/Path('submeasurements')).iterdir():
+					if pp.is_dir():
+						submeasurements[str(pp)] = find_submeasurements_recursively(pp)
+	if len(submeasurements)>0:
+		return {str(measurement_base_path):submeasurements}
+	else:
+		return None
+
 class SmarterBureaucrat:
 	"""Let a `SmartBureaucrat` ease your life by doing all the boring stuff
 	while you focus on the important things.
