@@ -251,7 +251,7 @@ bureaucrat = Bureaucrat(
 			pass
 		
 		for fname in {'script_successfully_applied','.script_successfully_applied'}: # Compatibility with older bureaucrats...
-			script_was_applied_without_errors |= (self.path_to_default_output_directory(script_name)/Path(fname)).is_file()
+			script_was_applied_without_errors |= (self.path_to_output_directory_of_script_named(script_name)/Path(fname)).is_file()
 		
 		return script_was_applied_without_errors
 	
