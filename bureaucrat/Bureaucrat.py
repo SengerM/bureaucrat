@@ -68,6 +68,8 @@ using locals() which does exactly that.''')
 		self._this_script_job_successfully_completed_before_flag |= (self.processed_data_dir_path/Path('.script_successfully_applied')).is_file() # This is to maintain compatibility with the older version. Now this is not a hidden file anymore because it was causing troubles with remote machines, cloud sync, etc.
 		
 		self._backup_calling_script_file(variables)
+		
+		warnings.warn('You are using an old (and deprecated) version of the Bureaucrat! Use the `SmarterBureaucrat` instead which provides better and more functionality.')
 	
 	@property
 	def measurement_base_path(self):
