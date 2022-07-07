@@ -135,7 +135,7 @@ bureaucrat = Bureaucrat(
 	@property
 	def measurement_name(self) -> str:
 		"""Returns a string with the measurement name."""
-		return self.path_to_default_output_directory.parts[-1]
+		return self.path_to_measurement_base_directory.parts[-1]
 	
 	@property
 	def birth_datetime(self) -> datetime.datetime:
