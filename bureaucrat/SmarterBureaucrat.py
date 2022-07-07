@@ -211,6 +211,38 @@ bureaucrat = Bureaucrat(
 		
 		return script_was_applied_without_errors
 	
+	def check_required_scripts_were_run_before(self, script_names, raise_error:bool=True) -> bool:
+		"""Given a list of script names, check whether all of them were
+		previously run without errors on the current measurement. This 
+		is the same as using `script_was_applied_without_errors` in a loop
+		checking individually for each script.
+		
+		Parameters
+		----------
+		script_names: iterable of str
+			An iterable (list, tuple, set, etc.) with the names of the
+			scripts that you want to check for.
+		raise_error: bool, default True
+			If `True` a `RuntimeError` is raised if any of the scripts
+			we are checking for did not run successfully.
+		
+		Returns
+		-------
+		were_the_scripts_applied_without_errors: bool
+			If all the scripts were applied without errors, `True` is
+			returned. Else `False.
+		"""
+		were_the_scripts_applied_without_errors = True
+		scripts_that_did_not_run_without_errors = set()
+		for script_name in script_names:
+			if self.script_was_applied_without_errors(script_name) == True:
+				continue
+			were_the_scripts_applied_without_errors &= False
+			scripts_that_did_not_run_without_errors.add(script_name)
+		if raise_error == True and were_the_scripts_applied_without_errors == False:
+			raise RuntimeError(f'The following scripts did not run without errors beforehand on measurement {self.measurement_name}: {scripts_that_did_not_run_without_errors}')
+		return were_the_scripts_applied_without_errors
+	
 	def path_to_output_directory_of_script_named(self, script_name:str) -> Path:
 		"""Returns the path to the directory where another script named 
 		`script_name` that was run before on the same measurement was 
