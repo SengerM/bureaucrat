@@ -62,6 +62,9 @@ bureaucrat = Bureaucrat(
 		if ' ' in str(measurement_base_path):
 			warnings.warn(f'The `measurement_base_path` contains blank spaces. I can handle this, but it is always better to aviod them.')
 		
+		if not isinstance(self, NamedTaskBureaucrat):
+			warnings.warn(f'You are using {SmarterBureaucrat}, it is better to use {NamedTaskBureaucrat} instead. Anyway it will work, but consider changing.')
+		
 		self._datetime_bureaucrat_was_born = datetime.datetime.now()
 		
 		self._path_to_the_script_that_created_this_bureaucrat = Path.cwd()/Path(inspect.currentframe().f_back.f_code.co_filename)
