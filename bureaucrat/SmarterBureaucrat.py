@@ -5,6 +5,8 @@ import inspect
 import tempfile
 from shutil import rmtree
 
+NICE_CHARACTERS_FOR_FILE_AND_DIRECTORY_NAMES = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '_', '-'} # https://stackoverflow.com/a/1976172/8849755
+
 def find_submeasurements_recursively(measurement_base_path:Path) -> dict:
 	submeasurements = dict()
 	for p in measurement_base_path.iterdir():
@@ -202,21 +204,24 @@ bureaucrat = Bureaucrat(
 		"""
 		submeasurements_tree = find_submeasurements_recursively(self.path_to_measurement_base_directory)
 		submeasurements_dict = {}
-		for top_level in submeasurements_tree: # `find_submeasurements_recursively` returns a tree starting from the top level measurement... This `for` loop only has one iteration.
-			for submeasurement in submeasurements_tree[top_level]:
-				path_to_submeasurement = Path(submeasurement)
-				submeasurement_name = path_to_submeasurement.parts[-1]
-				submeasurement_created_by_script = path_to_submeasurement.parts[-3]
-				if submeasurement_created_by_script not in submeasurements_dict:
-					submeasurements_dict[submeasurement_created_by_script] = dict()
-				submeasurements_dict[submeasurement_created_by_script][submeasurement_name] = path_to_submeasurement
+		if submeasurements_tree is not None:
+			for top_level in submeasurements_tree: # `find_submeasurements_recursively` returns a tree starting from the top level measurement... This `for` loop only has one iteration.
+				for submeasurement in submeasurements_tree[top_level]:
+					path_to_submeasurement = Path(submeasurement)
+					submeasurement_name = path_to_submeasurement.parts[-1]
+					submeasurement_created_by_script = path_to_submeasurement.parts[-3]
+					if submeasurement_created_by_script not in submeasurements_dict:
+						submeasurements_dict[submeasurement_created_by_script] = dict()
+					submeasurements_dict[submeasurement_created_by_script][submeasurement_name] = path_to_submeasurement
 		return submeasurements_dict
 	
-	def find_submeasurements(self, script_name:str) -> dict:
+	def find_submeasurements_of_script(self, script_name:str) -> dict:
 		"""Finds the submeasurements produced by script named `script_name`.
 		Returns a dictionary where the keys are the submeasurements names
 		and the items are `Path` objects pointing to each submeasurement.
 		"""
+		if not isinstance(script_name, str) or script_name[-3:] != '.py':
+			raise ValueError(f'`script_name` must be a string of the form `"your_script_name.py"`, received {script_name}.')
 		return self.find_all_submeasurements().get(script_name.replace('.py',''))
 	
 	def script_was_applied_without_errors(self, script_name:str=None) -> bool:
@@ -238,6 +243,8 @@ bureaucrat = Bureaucrat(
 		"""
 		if script_name is None:
 			script_name = self._path_to_the_script_that_created_this_bureaucrat.parts[-1]
+		elif not isinstance(script_name, str) or script_name[-3:] != '.py':
+			raise ValueError(f'`script_name` must be a string of the form `"your_script_name.py"`, received {script_name}.')
 		errors_report_file_path = self.path_to_output_directory_of_script_named(script_name)/Path('SmarterBureaucrat_errors_report.txt')
 		
 		script_was_applied_without_errors = False
@@ -301,6 +308,8 @@ bureaucrat = Bureaucrat(
 		script_name: str
 			The name of the other script.
 		"""
+		if not isinstance(script_name, str) or script_name[-3:] != '.py':
+			raise ValueError(f'`script_name` must be a string of the form `"your_script_name.py"`, received {script_name}.')
 		return self.path_to_measurement_base_directory/Path(script_name.replace(".py",""))
 	
 	def clean_default_output_directory(self):
@@ -327,3 +336,62 @@ bureaucrat = Bureaucrat(
 				for line in ifile:
 					line = line.replace("\n","").replace("\r","")
 					print(line, file = ofile)
+
+class NamedTaskBureaucrat(SmarterBureaucrat):
+	def __init__(self, measurement_base_path:Path, task_name:str, _locals:dict=None, new_measurement=False):
+		"""Create an instance of `Bureaucrat`.
+		
+		Parameters
+		----------
+		measurement_base_path: Path
+			If `new_measurement` is `True`, this must be a Path to the 
+			directory that contains your measurement.
+		task_name: str
+			A name for the task that this bureaucrat will handle.
+		_locals: ATTENTION HERE!
+			This is in some sense a hack for creating a backup of the script
+			that called this method including the variables values. You 
+			always have to use this parameter in the following way:
+			```
+			_locals = locals()
+			```
+			I found no way to automatize and hide this, sorry.
+		new_measurement: bool, default `False`
+			If `False` then `measurement_base_path` must exist beforehand,
+			i.e. you will run this script on a measurement that was already
+			created in the past, for example you will now analyze this 
+			data with another script. If `True` then a new directory
+			will be created as the root directory for a new measurement.
+		"""
+		super().__init__(measurement_base_path=measurement_base_path, _locals=_locals, new_measurement=new_measurement)
+		
+		if not isinstance(task_name, str):
+			raise ValueError(f'`task_name` must be an object of type {str}, received object of type {type(task_name)}.')
+		if len(set(task_name) - NICE_CHARACTERS_FOR_FILE_AND_DIRECTORY_NAMES) != 0:
+			warnings.warn(f'Your task name `{task_name}` contains the characters {set(task_name) - NICE_CHARACTERS_FOR_FILE_AND_DIRECTORY_NAMES} which are better to avoid for directory names.')
+		self._task_name = task_name
+		
+		self._path_to_the_script_that_created_this_bureaucrat = Path.cwd()/Path(inspect.currentframe().f_back.f_code.co_filename)
+		self._backup_script_file_name = f'backup.{self._path_to_the_script_that_created_this_bureaucrat.parts[-1]}'
+		self._make_backup_of_calling_script_file(
+			_locals = _locals, 
+			fpath = self.path_to_temporary_directory/Path(self._backup_script_file_name),
+		)
+		
+	@property
+	def path_to_default_output_directory(self) -> Path:
+		"""Path to the directory where you should place	the data produced
+		by your current script.
+		"""
+		if not hasattr(self, '_path_to_default_output_directory'):
+			self._path_to_default_output_directory = self.path_to_measurement_base_directory/self._task_name
+		return self._path_to_default_output_directory
+	
+	def find_submeasurements_of_task(self, task_name:str) -> dict:
+		return self.find_submeasurements_of_script(script_name=f'{task_name}.py')
+	
+	def task_was_applied_without_errors(self, task_name:str=None) -> bool:
+		return self.script_was_applied_without_errors(script_name=f'{task_name}.py')
+	
+	def path_to_output_directory_of_task_named(self, task_name:str) -> Path:
+		return self.path_to_output_directory_of_script_named(script_name=f'{task_name}.py')
