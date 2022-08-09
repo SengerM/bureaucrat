@@ -394,6 +394,10 @@ class NamedTaskBureaucrat(SmarterBureaucrat):
 		return self.find_submeasurements_of_script(script_name=f'{task_name}.py')
 	
 	def task_was_applied_without_errors(self, task_name:str=None) -> bool:
+		if task_name is None:
+			task_name = self._task_name
+		if not isinstance(task_name, str):
+			raise TypeError(f'`task_name` must be an instance of {str}, received object of type {type(task_name)}.')
 		return self.script_was_applied_without_errors(script_name=f'{task_name}.py')
 	
 	def path_to_output_directory_of_task_named(self, task_name:str) -> Path:
