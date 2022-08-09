@@ -398,3 +398,10 @@ class NamedTaskBureaucrat(SmarterBureaucrat):
 	
 	def path_to_output_directory_of_task_named(self, task_name:str) -> Path:
 		return self.path_to_output_directory_of_script_named(script_name=f'{task_name}.py')
+	
+	def check_required_tasks_were_run_before(self, task_names:list, raise_error:bool=True) -> bool:
+		if isinstance(task_names, str): # This is to make it more practical...
+			task_names = [task_names]
+		if not isinstance(task_names, (list, set)):
+			raise TypeError(f'`task_names` must be a list of strings, received object of type {type(task_names)}.')
+		return self.check_required_scripts_were_run_before(script_names = [f'{task_name}.py' for task_name in task_names], raise_error=raise_error)
