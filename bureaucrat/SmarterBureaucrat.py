@@ -380,7 +380,12 @@ class NamedTaskBureaucrat(SmarterBureaucrat):
 			_locals = _locals, 
 			fpath = self.path_to_temporary_directory/Path(self._backup_script_file_name),
 		)
-		
+	
+	@property
+	def task_name(self) -> str:
+		"""Return the name of the task."""
+		return self._name_task
+	
 	@property
 	def path_to_default_output_directory(self) -> Path:
 		"""Path to the directory where you should place	the data produced
