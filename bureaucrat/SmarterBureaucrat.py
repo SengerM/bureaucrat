@@ -384,7 +384,7 @@ class NamedTaskBureaucrat(SmarterBureaucrat):
 	@property
 	def task_name(self) -> str:
 		"""Return the name of the task."""
-		return self._name_task
+		return self._task_name
 	
 	@property
 	def path_to_default_output_directory(self) -> Path:
