@@ -298,7 +298,7 @@ bureaucrat = Bureaucrat(
 			were_the_scripts_applied_without_errors &= False
 			scripts_that_did_not_run_without_errors.add(script_name)
 		if raise_error == True and were_the_scripts_applied_without_errors == False:
-			raise RuntimeError(f'The following scripts did not run without errors beforehand on measurement {self.measurement_name}: {scripts_that_did_not_run_without_errors}')
+			raise RuntimeError(f'There is no successfull run of {scripts_that_did_not_run_without_errors} on measurement named `"{self.measurement_name}"` located in {self.path_to_measurement_base_directory}.')
 		return were_the_scripts_applied_without_errors
 	
 	def path_to_output_directory_of_script_named(self, script_name:str) -> Path:
