@@ -1,5 +1,7 @@
 # bureaucrat
 
+### DEPRECATED, use [this one](https://github.com/SengerM/the_bureaucrat)!!!
+
 Package for easy, standard, safe and OS independent handling of directories with my measurements and data processing. This should ensure that things are automatically kept in order without my intervention.
 
 ## Installation
